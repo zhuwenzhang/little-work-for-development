@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{% if mode == "create" %}新增栏目{% else %}编辑栏目{% endif %} - CMS{% endblock %}
+{% block content %}
+<section class="card auth-card">
+  <h1>{% if mode == "create" %}新增栏目{% else %}编辑栏目{% endif %}</h1>
+  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+  <form method="post">
+    {% csrf_token %}
+    <label>栏目名称
+      <input name="name" maxlength="100" required
+        value="{% if form %}{{ form.name }}{% elif category %}{{ category.name }}{% endif %}">
+    </label>
+    <label>简介
+      <input name="description" maxlength="255"
+        value="{% if form %}{{ form.description }}{% elif category %}{{ category.description }}{% endif %}">
+    </label>
+    <button type="submit">保存</button>
+  </form>
+  <p><a href="{% url 'cms:category_list' %}">← 返回列表</a></p>
+</section>
+{% endblock %}

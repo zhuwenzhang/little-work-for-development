@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{% if mode == "create" %}发布文章{% else %}编辑文章{% endif %} - CMS{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>{% if mode == "create" %}发布文章{% else %}编辑文章{% endif %}</h1>
+  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+  <form method="post" class="stack-form">
+    {% csrf_token %}
+    <label>标题
+      <input name="title" maxlength="200" value="{{ form.title }}" required>
+    </label>
+    <label>栏目
+      <select name="category_id" required>
+        <option value="">请选择栏目</option>
+        {% for c in categories %}
+          <option value="{{ c.id }}" {% if form.category_id == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>作者（可选）
+      <input name="author" maxlength="30" value="{{ form.author }}">
+    </label>
+    <label>发表时间
+      <input type="datetime-local" name="published_at" value="{{ form.published_at }}">
+    </label>
+    <label>是否发布
+      <select name="is_published">
+        <option value="1" {% if form.is_published %}selected{% endif %}>发布</option>
+        <option value="0" {% if not form.is_published %}selected{% endif %}>不发布</option>
+      </select>
+    </label>
+    <label>正文
+      <textarea name="content" rows="12" required>{{ form.content }}</textarea>
+    </label>
+    <button type="submit">保存</button>
+  </form>
+  <p><a href="{% url 'cms:item_list' %}">← 返回列表</a></p>
+</section>
+{% endblock %}

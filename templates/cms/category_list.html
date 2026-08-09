@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}栏目管理 - CMS{% endblock %}
+{% block content %}
+<section class="card">
+  <div class="row-between">
+    <h1>栏目管理</h1>
+    <a class="btn" href="{% url 'cms:category_create' %}">新增栏目</a>
+  </div>
+  <table>
+    <thead><tr><th>ID</th><th>名称</th><th>简介</th><th>创建时间</th><th>操作</th></tr></thead>
+    <tbody>
+      {% for c in categories %}
+      <tr>
+        <td>{{ c.id }}</td>
+        <td>{{ c.name }}</td>
+        <td>{{ c.description|default:"-" }}</td>
+        <td>{{ c.created_at|date:"Y-m-d H:i" }}</td>
+        <td class="ops">
+          <a href="{% url 'cms:category_edit' c.id %}">编辑</a>
+          <form method="post" action="{% url 'cms:category_delete' c.id %}" onsubmit="return confirm('确认删除该栏目？相关文章也会删除。');">
+            {% csrf_token %}
+            <button type="submit" class="link-danger">删除</button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5">暂无栏目</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p><a href="{% url 'cms:admin_home' %}">← 返回管理台</a></p>
+</section>
+{% endblock %}

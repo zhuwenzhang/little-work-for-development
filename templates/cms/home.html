@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}文章浏览 - CMS{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>前台文章浏览</h1>
+  <form class="search-bar" method="get">
+    <label>查询模式
+      <select name="mode" id="modeSelect">
+        <option value="title" {% if mode == "title" %}selected{% endif %}>按文章题目</option>
+        <option value="time" {% if mode == "time" %}selected{% endif %}>按发表时间</option>
+        <option value="category" {% if mode == "category" %}selected{% endif %}>按栏目</option>
+      </select>
+    </label>
+    <label class="mode-field" data-mode="title">题目关键词
+      <input name="keyword" value="{{ keyword }}" placeholder="模糊匹配标题">
+    </label>
+    <label class="mode-field" data-mode="time">开始日期
+      <input type="date" name="date_from" value="{{ date_from }}">
+    </label>
+    <label class="mode-field" data-mode="time">结束日期
+      <input type="date" name="date_to" value="{{ date_to }}">
+    </label>
+    <label class="mode-field" data-mode="category">栏目
+      <select name="category_id">
+        <option value="">全部栏目</option>
+        {% for c in categories %}
+          <option value="{{ c.id }}" {% if category_id == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button type="submit">查询</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{% if searched %}查询结果{% else %}已发布文章{% endif %}</h2>
+  {% if items %}
+  <table>
+    <thead>
+      <tr><th>标题</th><th>栏目</th><th>作者</th><th>发表时间</th></tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td><a href="{% url 'cms:item_detail' item.id %}">{{ item.title }}</a></td>
+        <td>{{ item.category.name }}</td>
+        <td>{{ item.author|default:"-" }}</td>
+        <td>{{ item.published_at|date:"Y-m-d H:i" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">暂无文章</p>
+  {% endif %}
+</section>
+<script>
+  function syncModeFields() {
+    const mode = document.getElementById("modeSelect").value;
+    document.querySelectorAll(".mode-field").forEach(el => {
+      el.style.display = el.dataset.mode === mode ? "" : "none";
+    });
+  }
+  document.getElementById("modeSelect").addEventListener("change", syncModeFields);
+  syncModeFields();
+</script>
+{% endblock %}

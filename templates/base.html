@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}CMS 原型系统{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">CMS 原型系统</div>
+    <nav>
+      {% if cms_user %}
+        <span class="user-chip">{{ cms_user.name }}（{{ cms_user.user_type_label }}）</span>
+        {% if cms_user.is_admin_side %}
+          <a href="{% url 'cms:admin_home' %}">管理台</a>
+        {% else %}
+          <a href="{% url 'cms:home' %}">前台</a>
+        {% endif %}
+        <a href="{% url 'accounts:logout' %}">退出</a>
+      {% else %}
+        <a href="{% url 'accounts:login' %}">登录</a>
+        <a href="{% url 'accounts:register' %}">注册</a>
+      {% endif %}
+    </nav>
+  </header>
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+  {% if redirect_url %}
+  <script>
+    setTimeout(function () {
+      window.location.href = "{{ redirect_url }}";
+    }, 2000);
+  </script>
+  {% endif %}
+</body>
+</html>

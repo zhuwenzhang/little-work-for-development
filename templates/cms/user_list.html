@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}用户管理 - CMS{% endblock %}
+{% block content %}
+<section class="card">
+  <div class="row-between">
+    <h1>用户管理</h1>
+    <a class="btn" href="{% url 'cms:user_create' %}">新增用户</a>
+  </div>
+  <p class="muted">
+    {% if can_manage_admin %}
+      超级用户可新增/停用「普通用户」和「管理员」。
+    {% else %}
+      管理员可新增/停用「普通用户」。
+    {% endif %}
+  </p>
+  <table>
+    <thead><tr><th>用户ID</th><th>姓名</th><th>密码(演示明文)</th><th>类型</th><th>状态</th><th>更新时间</th><th>操作</th></tr></thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>{{ u.user_id }}</td>
+        <td>{{ u.name }}</td>
+        <td>{{ u.password }}</td>
+        <td>{{ u.user_type_label }}</td>
+        <td>{% if u.is_disabled == 0 %}正常{% else %}停用{% endif %}</td>
+        <td>{{ u.updated_at|date:"Y-m-d H:i" }}</td>
+        <td class="ops">
+          {% if u.user_id != cms_user.user_id %}
+            {% if can_manage_admin and u.user_type != 2 %}
+              <form method="post" action="{% url 'cms:user_toggle' u.user_id %}">
+                {% csrf_token %}
+                <button type="submit">{% if u.is_disabled == 0 %}停用{% else %}启用{% endif %}</button>
+              </form>
+            {% elif not can_manage_admin and u.user_type == 1 %}
+              <form method="post" action="{% url 'cms:user_toggle' u.user_id %}">
+                {% csrf_token %}
+                <button type="submit">{% if u.is_disabled == 0 %}停用{% else %}启用{% endif %}</button>
+              </form>
+            {% else %}
+              -
+            {% endif %}
+          {% else %}
+            当前账号
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p><a href="{% url 'cms:admin_home' %}">← 返回管理台</a></p>
+</section>
+{% endblock %}

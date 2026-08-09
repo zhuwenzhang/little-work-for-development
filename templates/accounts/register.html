@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}注册 - CMS{% endblock %}
+{% block content %}
+<section class="card auth-card">
+  <h1>普通用户注册</h1>
+  {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+  {% if success %}<div class="alert alert-ok">{{ success }}</div>{% endif %}
+  <form method="post">
+    {% csrf_token %}
+    <label>用户ID（≤15）
+      <input name="user_id" maxlength="15" value="{{ form.user_id }}" required>
+    </label>
+    <label>密码（≤30，明文存储便于演示）
+      <input type="text" name="password" maxlength="30" value="{{ form.password }}" required>
+    </label>
+    <label>用户姓名（≤30）
+      <input name="name" maxlength="30" value="{{ form.name }}" required>
+    </label>
+    <button type="submit">注册</button>
+  </form>
+  <p class="muted">已有账号？<a href="{% url 'accounts:login' %}">去登录</a></p>
+</section>
+{% if error %}
+<script>alert("{{ error|escapejs }}");</script>
+{% endif %}
+{% if success %}
+<script>alert("{{ success|escapejs }}");</script>
+{% endif %}
+{% endblock %}

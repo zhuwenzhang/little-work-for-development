@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}管理台 - CMS{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>管理员界面</h1>
+  <p class="muted">当前身份：{{ cms_user.user_type_label }}</p>
+  <div class="grid-actions">
+    <a class="action" href="{% url 'cms:category_list' %}">栏目管理</a>
+    <a class="action" href="{% url 'cms:item_list' %}">文章管理</a>
+    <a class="action" href="{% url 'cms:user_list' %}">用户管理</a>
+  </div>
+  <div class="stats">
+    <div>栏目 {{ stats.category_count }}</div>
+    <div>文章 {{ stats.item_count }}（已发布 {{ stats.published_count }}）</div>
+    <div>用户 {{ stats.user_count }}</div>
+  </div>
+</section>
+{% endblock %}
