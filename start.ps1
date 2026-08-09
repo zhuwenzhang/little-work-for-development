@@ -9,6 +9,7 @@ $Mysql = Join-Path $MysqlBin 'mysql.exe'
 $MysqlHome = Join-Path $env:LOCALAPPDATA 'cms_prototype_mysql'
 $Ini = Join-Path $MysqlHome 'my.ini'
 $DataDir = Join-Path $MysqlHome 'data'
+$DbPassword = '123456'
 
 function Test-Port([int]$Port) {
     try {
@@ -19,6 +20,16 @@ function Test-Port([int]$Port) {
         $client.Close()
         return $false
     } catch { return $false }
+}
+
+function Invoke-Mysql([string[]]$ExtraArgs, [string]$Sql) {
+    # mysql writes errors to stderr; do not let PowerShell treat that as terminating
+    $old = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    $out = & $Mysql -h 127.0.0.1 -P 3307 --protocol=tcp @ExtraArgs -e $Sql 2>&1
+    $code = $LASTEXITCODE
+    $ErrorActionPreference = $old
+    return @{ Code = $code; Output = $out }
 }
 
 Write-Host ''
@@ -89,12 +100,38 @@ if (-not (Test-Port 3307)) {
 }
 
 Write-Host 'INFO: preparing database cms_prototype ...' -ForegroundColor Cyan
-& $Mysql -h 127.0.0.1 -P 3307 -u root --protocol=tcp -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '123456'; CREATE USER IF NOT EXISTS 'root'@'127.0.0.1' IDENTIFIED BY '123456'; CREATE DATABASE IF NOT EXISTS cms_prototype DEFAULT CHARACTER SET utf8mb4; GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION; GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1' WITH GRANT OPTION; FLUSH PRIVILEGES;" 2>$null
-& $Mysql -h 127.0.0.1 -P 3307 -u root -p123456 --protocol=tcp -e "CREATE DATABASE IF NOT EXISTS cms_prototype DEFAULT CHARACTER SET utf8mb4;"
-if ($LASTEXITCODE -ne 0) {
-    Write-Host 'ERROR: cannot connect MySQL 3307 / create database' -ForegroundColor Red
-    exit 1
+
+$setupSql = @"
+CREATE DATABASE IF NOT EXISTS cms_prototype DEFAULT CHARACTER SET utf8mb4;
+CREATE USER IF NOT EXISTS 'root'@'127.0.0.1' IDENTIFIED BY '$DbPassword';
+ALTER USER 'root'@'localhost' IDENTIFIED BY '$DbPassword';
+ALTER USER 'root'@'127.0.0.1' IDENTIFIED BY '$DbPassword';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+"@
+
+# Prefer password login (normal case after first setup)
+$r = Invoke-Mysql @('-u', 'root', "-p$DbPassword") $setupSql
+if ($r.Code -ne 0) {
+    # Fallback: first-time insecure empty password
+    Write-Host 'INFO: password login failed, trying empty password once ...' -ForegroundColor DarkYellow
+    $r2 = Invoke-Mysql @('-u', 'root') "ALTER USER 'root'@'localhost' IDENTIFIED BY '$DbPassword'; CREATE USER IF NOT EXISTS 'root'@'127.0.0.1' IDENTIFIED BY '$DbPassword'; ALTER USER 'root'@'127.0.0.1' IDENTIFIED BY '$DbPassword'; CREATE DATABASE IF NOT EXISTS cms_prototype DEFAULT CHARACTER SET utf8mb4; GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION; GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1' WITH GRANT OPTION; FLUSH PRIVILEGES;"
+    if ($r2.Code -ne 0) {
+        Write-Host 'ERROR: cannot connect MySQL 3307 / create database' -ForegroundColor Red
+        Write-Host ($r.Output | Out-String)
+        Write-Host ($r2.Output | Out-String)
+        exit 1
+    }
+    $r = Invoke-Mysql @('-u', 'root', "-p$DbPassword") "CREATE DATABASE IF NOT EXISTS cms_prototype DEFAULT CHARACTER SET utf8mb4;"
+    if ($r.Code -ne 0) {
+        Write-Host 'ERROR: create database failed after setting password' -ForegroundColor Red
+        Write-Host ($r.Output | Out-String)
+        exit 1
+    }
 }
+
+Write-Host 'OK: database ready' -ForegroundColor Green
 
 Set-Location -LiteralPath $Root
 Write-Host 'INFO: migrate ...' -ForegroundColor Cyan
