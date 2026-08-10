@@ -1,0 +1,13 @@
+1.config配置数据库
+2.accounts 账号相关
+3.cms 就是相关业务
+4.templates 是thml界面
+
+各个里面的文件
+
+models.py 就是对应的表处理
+
+views.py 就是要实现的功能
+
+urls.py 就是业务的映射
+
