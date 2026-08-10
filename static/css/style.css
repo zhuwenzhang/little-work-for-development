@@ -119,15 +119,51 @@ th, td {
   text-align: left;
   vertical-align: top;
 }
-.ops { display: flex; gap: 10px; align-items: center; }
-.ops form { margin: 0; }
-.ops button, .link-danger {
+.ops {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 160px;
+}
+.ops form { margin: 0; display: inline-flex; }
+.ops a,
+.ops button,
+.ops .link-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: auto;
-  background: transparent;
-  color: var(--danger);
-  border: none;
-  padding: 0;
+  min-width: 72px;
+  height: 32px;
+  margin: 0;
+  padding: 0 12px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--accent);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1;
+  text-decoration: none;
   cursor: pointer;
+  box-sizing: border-box;
+}
+.ops a:hover,
+.ops button:hover {
+  background: #eef8f3;
+  text-decoration: none;
+}
+.ops button.link-danger,
+.ops .link-danger {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: #fff;
+}
+.ops button.link-danger:hover,
+.ops .link-danger:hover {
+  background: #fee4e2;
 }
 .row-between {
   display: flex;
