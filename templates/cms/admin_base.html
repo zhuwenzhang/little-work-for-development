@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block container_class %}container-wide{% endblock %}
+{% block content %}
+<div class="admin-layout" style="display:flex;flex-direction:row;gap:16px;align-items:stretch;width:100%;">
+  <aside class="card admin-side" style="flex:0 0 220px;width:220px;margin-bottom:0;">
+    <h2>管理员界面</h2>
+    <p class="muted side-role">{{ cms_user.user_type_label }}</p>
+    <nav class="admin-nav">
+      <a href="{% url 'cms:admin_home' %}" class="{% if request.path == '/manage/' %}active{% endif %}">概览</a>
+      <a href="{% url 'cms:category_list' %}" class="{% if '/manage/categories' in request.path %}active{% endif %}">栏目管理</a>
+      <a href="{% url 'cms:item_list' %}" class="{% if '/manage/items' in request.path %}active{% endif %}">文章管理</a>
+      <a href="{% url 'cms:user_list' %}" class="{% if '/manage/users' in request.path %}active{% endif %}">用户管理</a>
+    </nav>
+  </aside>
+  <div class="admin-main" style="flex:1 1 auto;min-width:0;">
+    {% block admin_content %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

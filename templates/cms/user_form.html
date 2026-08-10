@@ -1,7 +1,7 @@
-{% extends "base.html" %}
+{% extends "cms/admin_base.html" %}
 {% block title %}新增用户 - CMS{% endblock %}
-{% block content %}
-<section class="card auth-card">
+{% block admin_content %}
+<section class="card" style="margin-bottom:0;max-width:520px;">
   <h1>新增用户</h1>
   {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
   <form method="post">
@@ -24,6 +24,6 @@
     </label>
     <button type="submit">创建</button>
   </form>
-  <p><a href="{% url 'cms:user_list' %}">← 返回列表</a></p>
+  <p><a href="{% url 'cms:user_list' %}">← 返回用户列表</a></p>
 </section>
 {% endblock %}

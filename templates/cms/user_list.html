@@ -1,7 +1,7 @@
-{% extends "base.html" %}
+{% extends "cms/admin_base.html" %}
 {% block title %}用户管理 - CMS{% endblock %}
-{% block content %}
-<section class="card">
+{% block admin_content %}
+<section class="card" style="margin-bottom:0;">
   <div class="row-between">
     <h1>用户管理</h1>
     <a class="btn" href="{% url 'cms:user_create' %}">新增用户</a>
@@ -54,6 +54,5 @@
       {% endfor %}
     </tbody>
   </table>
-  <p><a href="{% url 'cms:admin_home' %}">← 返回管理台</a></p>
 </section>
 {% endblock %}
