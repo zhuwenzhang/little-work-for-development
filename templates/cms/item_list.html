@@ -6,6 +6,30 @@
     <h1>文章管理</h1>
     <a class="btn" href="{% url 'cms:item_create' %}">发布文章</a>
   </div>
+
+  <form class="search-bar admin-search" method="get">
+    <label>查询模式
+      <select name="mode" id="itemModeSelect">
+        <option value="title" {% if mode == "title" %}selected{% endif %}>按文章题目</option>
+        <option value="time" {% if mode == "time" %}selected{% endif %}>按发表时间</option>
+        <option value="author" {% if mode == "author" %}selected{% endif %}>按作者</option>
+      </select>
+    </label>
+    <label class="item-mode-field" data-mode="title">题目关键词
+      <input name="keyword" value="{{ keyword }}" placeholder="模糊匹配标题">
+    </label>
+    <label class="item-mode-field" data-mode="author">作者姓名
+      <input name="author" value="{{ author }}" placeholder="模糊匹配作者">
+    </label>
+    <label class="item-mode-field" data-mode="time">开始日期
+      <input type="date" name="date_from" value="{{ date_from }}">
+    </label>
+    <label class="item-mode-field" data-mode="time">结束日期
+      <input type="date" name="date_to" value="{{ date_to }}">
+    </label>
+    <button type="submit">查询</button>
+  </form>
+
   <table>
     <thead><tr><th>标题</th><th>栏目</th><th>作者</th><th>发表时间</th><th>状态</th><th>操作</th></tr></thead>
     <tbody>
@@ -30,4 +54,14 @@
     </tbody>
   </table>
 </section>
+<script>
+  function syncItemModeFields() {
+    const mode = document.getElementById("itemModeSelect").value;
+    document.querySelectorAll(".item-mode-field").forEach(el => {
+      el.style.display = el.dataset.mode === mode ? "" : "none";
+    });
+  }
+  document.getElementById("itemModeSelect").addEventListener("change", syncItemModeFields);
+  syncItemModeFields();
+</script>
 {% endblock %}

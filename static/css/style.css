@@ -296,7 +296,9 @@ th, td {
   }
 }
 
-.admin-side h2 { margin-bottom: 6px; font-size: 18px; }
+.admin-search {
+  margin: 14px 0 18px;
+}
 .admin-side .side-role { margin: 0 0 16px; font-size: 13px; }
 .admin-nav {
   display: flex;

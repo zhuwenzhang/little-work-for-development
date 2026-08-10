@@ -13,6 +13,20 @@
       管理员可新增/停用「普通用户」，并可初始化密码为 123456。
     {% endif %}
   </p>
+
+  <form class="search-bar admin-search" method="get">
+    <label>查询模式
+      <select name="mode" id="userModeSelect">
+        <option value="user_id" {% if mode == "user_id" %}selected{% endif %}>按用户ID</option>
+        <option value="name" {% if mode == "name" %}selected{% endif %}>按姓名</option>
+      </select>
+    </label>
+    <label>关键词
+      <input name="keyword" value="{{ keyword }}" placeholder="模糊匹配用户ID或姓名">
+    </label>
+    <button type="submit">查询</button>
+  </form>
+
   <table>
     <thead><tr><th>用户ID</th><th>姓名</th><th>类型</th><th>状态</th><th>更新时间</th><th>操作</th></tr></thead>
     <tbody>

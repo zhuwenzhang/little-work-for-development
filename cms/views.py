@@ -177,8 +177,36 @@ def category_delete(request, pk):
 # ---------- 文章 CRUD ----------
 @admin_required
 def item_list(request):
+    mode = (request.GET.get("mode") or "title").strip()
+    keyword = (request.GET.get("keyword") or "").strip()
+    author = (request.GET.get("author") or "").strip()
+    date_from = (request.GET.get("date_from") or "").strip()
+    date_to = (request.GET.get("date_to") or "").strip()
+
     items = Item.objects.select_related("category").all()
-    return render(request, "cms/item_list.html", {"items": items})
+    if mode == "title" and keyword:
+        items = items.filter(title__icontains=keyword)
+    elif mode == "time":
+        start, end = _parse_day_range(date_from, date_to)
+        if start:
+            items = items.filter(published_at__gte=start)
+        if end:
+            items = items.filter(published_at__lte=end)
+    elif mode == "author" and author:
+        items = items.filter(author__icontains=author)
+
+    return render(
+        request,
+        "cms/item_list.html",
+        {
+            "items": items,
+            "mode": mode,
+            "keyword": keyword,
+            "author": author,
+            "date_from": date_from,
+            "date_to": date_to,
+        },
+    )
 
 
 def _item_form_context(mode, item=None, error=None, post=None):
@@ -296,13 +324,23 @@ def item_delete(request, pk):
 @admin_required
 def user_list(request):
     current = request.cms_user
+    mode = (request.GET.get("mode") or "user_id").strip()
+    keyword = (request.GET.get("keyword") or "").strip()
+
     users = UserApp.objects.all().order_by("user_type", "user_id")
+    if mode == "user_id" and keyword:
+        users = users.filter(user_id__icontains=keyword)
+    elif mode == "name" and keyword:
+        users = users.filter(name__icontains=keyword)
+
     return render(
         request,
         "cms/user_list.html",
         {
             "users": users,
             "can_manage_admin": current.user_type == UserApp.USER_TYPE_SUPER,
+            "mode": mode,
+            "keyword": keyword,
         },
     )
 
