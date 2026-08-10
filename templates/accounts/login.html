@@ -15,7 +15,6 @@
     <button type="submit">登录</button>
   </form>
   <p class="muted">还没有账号？<a href="{% url 'accounts:register' %}">去注册</a></p>
-  <p class="hint">演示账号：超级用户 <code>super</code> / <code>1</code>；管理员 <code>admin</code> / <code>1</code>；普通用户 <code>user01</code> / <code>1</code></p>
 </section>
 {% if error %}
 <script>alert("{{ error|escapejs }}");</script>
