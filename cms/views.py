@@ -27,19 +27,23 @@ def _parse_day_range(date_from_str, date_to_str):
 
 @login_required_custom
 def home(request):
-    """普通用户前台：文章列表 + 三种查询。"""
+    """普通用户前台：文章列表 + 查询（题目/时间/栏目/作者）。"""
     user = request.cms_user
     if user.is_admin_side:
         return redirect("cms:admin_home")
 
     mode = (request.GET.get("mode") or "title").strip()
     keyword = (request.GET.get("keyword") or "").strip()
+    author = (request.GET.get("author") or "").strip()
     date_from = (request.GET.get("date_from") or "").strip()
     date_to = (request.GET.get("date_to") or "").strip()
     category_id = (request.GET.get("category_id") or "").strip()
 
     items = Item.objects.filter(is_published=True).select_related("category")
-    searched = any(request.GET.get(k) for k in ("mode", "keyword", "date_from", "date_to", "category_id"))
+    searched = any(
+        request.GET.get(k)
+        for k in ("mode", "keyword", "author", "date_from", "date_to", "category_id")
+    )
 
     if mode == "title" and keyword:
         items = items.filter(title__icontains=keyword)
@@ -51,6 +55,8 @@ def home(request):
             items = items.filter(published_at__lte=end)
     elif mode == "category" and category_id:
         items = items.filter(category_id=category_id)
+    elif mode == "author" and author:
+        items = items.filter(author__icontains=author)
 
     categories = Category.objects.all()
     return render(
@@ -61,6 +67,7 @@ def home(request):
             "categories": categories,
             "mode": mode,
             "keyword": keyword,
+            "author": author,
             "date_from": date_from,
             "date_to": date_to,
             "category_id": category_id,

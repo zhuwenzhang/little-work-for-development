@@ -9,10 +9,14 @@
         <option value="title" {% if mode == "title" %}selected{% endif %}>按文章题目</option>
         <option value="time" {% if mode == "time" %}selected{% endif %}>按发表时间</option>
         <option value="category" {% if mode == "category" %}selected{% endif %}>按栏目</option>
+        <option value="author" {% if mode == "author" %}selected{% endif %}>按作者</option>
       </select>
     </label>
     <label class="mode-field" data-mode="title">题目关键词
       <input name="keyword" value="{{ keyword }}" placeholder="模糊匹配标题">
+    </label>
+    <label class="mode-field" data-mode="author">作者姓名
+      <input name="author" value="{{ author }}" placeholder="模糊匹配作者">
     </label>
     <label class="mode-field" data-mode="time">开始日期
       <input type="date" name="date_from" value="{{ date_from }}">
