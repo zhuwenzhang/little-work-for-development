@@ -46,3 +46,7 @@
 - Database: `cms_prototype`
 - User: `root`
 - Password: `123456`
+
+## 拓展功能
+- 用户: 可以发表评论
+- 管理员：不能删除但是可以不显示该评论
