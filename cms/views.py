@@ -354,24 +354,23 @@ def user_create(request):
     return redirect("cms:user_list")
 
 
+def _can_manage_target(current: UserApp, target: UserApp) -> bool:
+    """超级用户可管普通用户/管理员；管理员只能管普通用户；不可操作自己或其他超管。"""
+    if target.user_id == current.user_id:
+        return False
+    if current.user_type == UserApp.USER_TYPE_SUPER:
+        return target.user_type != UserApp.USER_TYPE_SUPER
+    if current.user_type == UserApp.USER_TYPE_ADMIN:
+        return target.user_type == UserApp.USER_TYPE_NORMAL
+    return False
+
+
 @admin_required
 @require_POST
 def user_toggle(request, user_id):
     current = request.cms_user
     target = get_object_or_404(UserApp, pk=user_id)
-
-    if target.user_id == current.user_id:
-        return redirect("cms:user_list")
-
-    # 超级用户：可停用普通用户和管理员；不可动其他超级用户
-    # 管理员：只能停用普通用户
-    if current.user_type == UserApp.USER_TYPE_SUPER:
-        if target.user_type == UserApp.USER_TYPE_SUPER:
-            return redirect("cms:user_list")
-    elif current.user_type == UserApp.USER_TYPE_ADMIN:
-        if target.user_type != UserApp.USER_TYPE_NORMAL:
-            return redirect("cms:user_list")
-    else:
+    if not _can_manage_target(current, target):
         return redirect("cms:user_list")
 
     target.is_disabled = (
@@ -380,4 +379,17 @@ def user_toggle(request, user_id):
         else UserApp.STATUS_DISABLED
     )
     target.save(update_fields=["is_disabled", "updated_at"])
+    return redirect("cms:user_list")
+
+
+@admin_required
+@require_POST
+def user_reset_password(request, user_id):
+    current = request.cms_user
+    target = get_object_or_404(UserApp, pk=user_id)
+    if not _can_manage_target(current, target):
+        return redirect("cms:user_list")
+
+    target.password = "123456"
+    target.save(update_fields=["password", "updated_at"])
     return redirect("cms:user_list")

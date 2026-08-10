@@ -8,19 +8,18 @@
   </div>
   <p class="muted">
     {% if can_manage_admin %}
-      超级用户可新增/停用「普通用户」和「管理员」。
+      超级用户可新增/停用「普通用户」和「管理员」，并可初始化密码为 123456。
     {% else %}
-      管理员可新增/停用「普通用户」。
+      管理员可新增/停用「普通用户」，并可初始化密码为 123456。
     {% endif %}
   </p>
   <table>
-    <thead><tr><th>用户ID</th><th>姓名</th><th>密码(演示明文)</th><th>类型</th><th>状态</th><th>更新时间</th><th>操作</th></tr></thead>
+    <thead><tr><th>用户ID</th><th>姓名</th><th>类型</th><th>状态</th><th>更新时间</th><th>操作</th></tr></thead>
     <tbody>
       {% for u in users %}
       <tr>
         <td>{{ u.user_id }}</td>
         <td>{{ u.name }}</td>
-        <td>{{ u.password }}</td>
         <td>{{ u.user_type_label }}</td>
         <td>{% if u.is_disabled == 0 %}正常{% else %}停用{% endif %}</td>
         <td>{{ u.updated_at|date:"Y-m-d H:i" }}</td>
@@ -31,10 +30,18 @@
                 {% csrf_token %}
                 <button type="submit">{% if u.is_disabled == 0 %}停用{% else %}启用{% endif %}</button>
               </form>
+              <form method="post" action="{% url 'cms:user_reset_password' u.user_id %}" onsubmit="return confirm('确认将该用户密码初始化为 123456？');">
+                {% csrf_token %}
+                <button type="submit">初始化密码</button>
+              </form>
             {% elif not can_manage_admin and u.user_type == 1 %}
               <form method="post" action="{% url 'cms:user_toggle' u.user_id %}">
                 {% csrf_token %}
                 <button type="submit">{% if u.is_disabled == 0 %}停用{% else %}启用{% endif %}</button>
+              </form>
+              <form method="post" action="{% url 'cms:user_reset_password' u.user_id %}" onsubmit="return confirm('确认将该用户密码初始化为 123456？');">
+                {% csrf_token %}
+                <button type="submit">初始化密码</button>
               </form>
             {% else %}
               -

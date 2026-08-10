@@ -19,4 +19,9 @@ urlpatterns = [
     path("manage/users/", views.user_list, name="user_list"),
     path("manage/users/create/", views.user_create, name="user_create"),
     path("manage/users/<str:user_id>/toggle/", views.user_toggle, name="user_toggle"),
+    path(
+        "manage/users/<str:user_id>/reset-password/",
+        views.user_reset_password,
+        name="user_reset_password",
+    ),
 ]
