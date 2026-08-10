@@ -48,7 +48,7 @@ def register(request):
         context["error"] = "用户ID已存在，请重新注册"
         return render(request, "accounts/register.html", context)
 
-    context["success"] = "注册成功，2秒后跳转到登录界面"
+    context["success"] = "注册成功，0.5秒后跳转到登录界面"
     context["redirect_url"] = "/login/"
     return render(request, "accounts/register.html", context)
 
