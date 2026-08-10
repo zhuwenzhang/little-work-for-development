@@ -1,14 +1,23 @@
 {% extends "base.html" %}
 {% block title %}文章浏览 - CMS{% endblock %}
+{% block container_class %}container-wide{% endblock %}
 {% block content %}
-<section class="card">
+<section class="card browse-top">
   <h1>前台文章浏览</h1>
+  <div class="category-tabs">
+    <a class="cat-tab {% if not category_id %}active{% endif %}"
+       href="?mode={{ mode }}&keyword={{ keyword }}&author={{ author }}&date_from={{ date_from }}&date_to={{ date_to }}">全部栏目</a>
+    {% for c in categories %}
+      <a class="cat-tab {% if category_id == c.id|stringformat:'s' %}active{% endif %}"
+         href="?category_id={{ c.id }}&mode={{ mode }}&keyword={{ keyword }}&author={{ author }}&date_from={{ date_from }}&date_to={{ date_to }}">{{ c.name }}</a>
+    {% endfor %}
+  </div>
   <form class="search-bar" method="get">
+    {% if category_id %}<input type="hidden" name="category_id" value="{{ category_id }}">{% endif %}
     <label>查询模式
       <select name="mode" id="modeSelect">
         <option value="title" {% if mode == "title" %}selected{% endif %}>按文章题目</option>
         <option value="time" {% if mode == "time" %}selected{% endif %}>按发表时间</option>
-        <option value="category" {% if mode == "category" %}selected{% endif %}>按栏目</option>
         <option value="author" {% if mode == "author" %}selected{% endif %}>按作者</option>
       </select>
     </label>
@@ -24,40 +33,44 @@
     <label class="mode-field" data-mode="time">结束日期
       <input type="date" name="date_to" value="{{ date_to }}">
     </label>
-    <label class="mode-field" data-mode="category">栏目
-      <select name="category_id">
-        <option value="">全部栏目</option>
-        {% for c in categories %}
-          <option value="{{ c.id }}" {% if category_id == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
-        {% endfor %}
-      </select>
-    </label>
     <button type="submit">查询</button>
   </form>
 </section>
 
-<section class="card">
-  <h2>{% if searched %}查询结果{% else %}已发布文章{% endif %}</h2>
-  {% if items %}
-  <table>
-    <thead>
-      <tr><th>标题</th><th>栏目</th><th>作者</th><th>发表时间</th></tr>
-    </thead>
-    <tbody>
-      {% for item in items %}
-      <tr>
-        <td><a href="{% url 'cms:item_detail' item.id %}">{{ item.title }}</a></td>
-        <td>{{ item.category.name }}</td>
-        <td>{{ item.author|default:"-" }}</td>
-        <td>{{ item.published_at|date:"Y-m-d H:i" }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-  <p class="muted">暂无文章</p>
-  {% endif %}
+<section class="browse-split" style="display:flex;flex-direction:row;gap:16px;align-items:stretch;width:100%;">
+  <aside class="card browse-list" style="flex:0 0 300px;width:300px;max-width:34%;margin-bottom:0;">
+    <h2>文章标题</h2>
+    {% if items %}
+      <ul class="article-list">
+        {% for item in items %}
+        <li class="{% if selected_item and selected_item.id == item.id %}active{% endif %}">
+          <a href="?item={{ item.id }}&category_id={{ category_id }}&mode={{ mode }}&keyword={{ keyword }}&author={{ author }}&date_from={{ date_from }}&date_to={{ date_to }}">
+            <div class="article-title">{{ item.title }}</div>
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">暂无文章</p>
+    {% endif %}
+  </aside>
+
+  <article class="card browse-detail" style="flex:1 1 auto;min-width:0;margin-bottom:0;">
+    {% if selected_item %}
+      <h2>{{ selected_item.title }}</h2>
+      <p class="meta">
+        栏目：{{ selected_item.category.name }}
+        · 作者：{{ selected_item.author|default:"-" }}
+        · 发表：{{ selected_item.published_at|date:"Y-m-d H:i" }}
+      </p>
+      <div class="content">{{ selected_item.content|linebreaks }}</div>
+    {% else %}
+      <h2>文章详情</h2>
+      <p class="muted">请在左侧选择一篇文章查看全文</p>
+    {% endif %}
+  </article>
 </section>
+
 <script>
   function syncModeFields() {
     const mode = document.getElementById("modeSelect").value;

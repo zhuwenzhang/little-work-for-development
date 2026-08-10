@@ -27,7 +27,7 @@ def _parse_day_range(date_from_str, date_to_str):
 
 @login_required_custom
 def home(request):
-    """普通用户前台：文章列表 + 查询（题目/时间/栏目/作者）。"""
+    """普通用户前台：顶部分栏 + 左侧列表 + 右侧正文。"""
     user = request.cms_user
     if user.is_admin_side:
         return redirect("cms:admin_home")
@@ -38,12 +38,13 @@ def home(request):
     date_from = (request.GET.get("date_from") or "").strip()
     date_to = (request.GET.get("date_to") or "").strip()
     category_id = (request.GET.get("category_id") or "").strip()
+    item_id = (request.GET.get("item") or "").strip()
 
     items = Item.objects.filter(is_published=True).select_related("category")
-    searched = any(
-        request.GET.get(k)
-        for k in ("mode", "keyword", "author", "date_from", "date_to", "category_id")
-    )
+
+    # 顶部分栏筛选（始终生效）
+    if category_id:
+        items = items.filter(category_id=category_id)
 
     if mode == "title" and keyword:
         items = items.filter(title__icontains=keyword)
@@ -53,10 +54,20 @@ def home(request):
             items = items.filter(published_at__gte=start)
         if end:
             items = items.filter(published_at__lte=end)
-    elif mode == "category" and category_id:
-        items = items.filter(category_id=category_id)
     elif mode == "author" and author:
         items = items.filter(author__icontains=author)
+
+    items = list(items)
+    selected_item = None
+    if item_id.isdigit():
+        selected_item = next((x for x in items if x.id == int(item_id)), None)
+    if selected_item is None and items:
+        selected_item = items[0]
+
+    searched = any(
+        request.GET.get(k)
+        for k in ("mode", "keyword", "author", "date_from", "date_to", "category_id", "item")
+    )
 
     categories = Category.objects.all()
     return render(
@@ -65,6 +76,7 @@ def home(request):
         {
             "items": items,
             "categories": categories,
+            "selected_item": selected_item,
             "mode": mode,
             "keyword": keyword,
             "author": author,

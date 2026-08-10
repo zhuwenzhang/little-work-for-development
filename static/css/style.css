@@ -161,7 +161,101 @@ th, td {
 }
 .stack-form label { margin-bottom: 14px; }
 
+.container-wide { width: min(1180px, calc(100% - 32px)); }
+
+.browse-top h1 { margin-bottom: 14px; }
+.category-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.cat-tab {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #f7faf8;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 14px;
+}
+.cat-tab:hover { text-decoration: none; border-color: var(--accent-2); color: var(--accent); }
+.cat-tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.browse-split {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 16px;
+  align-items: stretch;
+  width: 100%;
+}
+.browse-list {
+  flex: 0 0 300px;
+  width: 300px;
+  max-width: 34%;
+  min-height: 420px;
+  margin-bottom: 0;
+}
+.browse-detail {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 420px;
+  margin-bottom: 0;
+}
+.browse-list h2, .browse-detail h2 { margin-bottom: 12px; }
+
+.article-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 70vh;
+  overflow: auto;
+}
+.article-list li {
+  border: 1px solid transparent;
+  border-bottom: 1px solid var(--line);
+  border-radius: 10px;
+  margin-bottom: 6px;
+}
+.article-list li a {
+  display: block;
+  padding: 12px 10px;
+  color: inherit;
+  text-decoration: none;
+}
+.article-list li:hover { background: #f4faf7; }
+.article-list li.active {
+  background: #e8f6f0;
+  border-color: #b7dfcf;
+}
+.article-title {
+  font-weight: 600;
+  color: var(--ink);
+}
+.browse-detail .content {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
 @media (max-width: 720px) {
   .grid-actions, .stats { grid-template-columns: 1fr; }
   .topbar { flex-direction: column; gap: 8px; align-items: flex-start; }
+}
+
+@media (max-width: 560px) {
+  .browse-split {
+    flex-direction: column;
+  }
+  .browse-list {
+    width: 100%;
+    max-width: 100%;
+    flex: 1 1 auto;
+  }
 }
