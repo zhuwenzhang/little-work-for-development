@@ -64,6 +64,43 @@
         · 发表：{{ selected_item.published_at|date:"Y-m-d H:i" }}
       </p>
       <div class="content">{{ selected_item.content|linebreaks }}</div>
+
+      <div class="comment-box">
+        <h3>发表评论</h3>
+        {% if comment_error %}<div class="alert alert-error">{{ comment_error }}</div>{% endif %}
+        {% if comment_success %}<div class="alert alert-ok">评论发表成功</div>{% endif %}
+        <form method="post" action="{% url 'cms:comment_create' %}" class="comment-form">
+          {% csrf_token %}
+          <input type="hidden" name="item_id" value="{{ selected_item.id }}">
+          <input type="hidden" name="category_id" value="{{ category_id }}">
+          <input type="hidden" name="mode" value="{{ mode }}">
+          <input type="hidden" name="keyword" value="{{ keyword }}">
+          <input type="hidden" name="author" value="{{ author }}">
+          <input type="hidden" name="date_from" value="{{ date_from }}">
+          <input type="hidden" name="date_to" value="{{ date_to }}">
+          <label>评论内容（不超过100字）
+            <textarea name="content" rows="3" maxlength="100" required placeholder="写下你的评论..."></textarea>
+          </label>
+          <button type="submit">发表评论</button>
+        </form>
+
+        <h3>已发表评论</h3>
+        {% if comments %}
+          <ul class="comment-list">
+            {% for c in comments %}
+            <li>
+              <div class="comment-head">
+                <strong>{{ c.user_name }}</strong>
+                <span class="muted">{{ c.commented_at|date:"Y-m-d H:i" }}</span>
+              </div>
+              <div class="comment-body">{{ c.content }}</div>
+            </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="muted">暂无可见评论</p>
+        {% endif %}
+      </div>
     {% else %}
       <h2>文章详情</h2>
       <p class="muted">请在左侧选择一篇文章查看全文</p>

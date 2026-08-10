@@ -24,4 +24,7 @@ urlpatterns = [
         views.user_reset_password,
         name="user_reset_password",
     ),
+    path("comment/create/", views.comment_create, name="comment_create"),
+    path("manage/comments/", views.comment_list, name="comment_list"),
+    path("manage/comments/<int:pk>/toggle/", views.comment_toggle, name="comment_toggle"),
 ]

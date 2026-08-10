@@ -1,0 +1,54 @@
+{% extends "cms/admin_base.html" %}
+{% block title %}评论管理 - CMS{% endblock %}
+{% block admin_content %}
+<section class="card" style="margin-bottom:0;">
+  <div class="row-between">
+    <h1>评论管理</h1>
+  </div>
+
+  <form class="search-bar admin-search" method="get">
+    <label>查询模式
+      <select name="mode">
+        <option value="content" {% if mode == "content" %}selected{% endif %}>按评论内容</option>
+        <option value="name" {% if mode == "name" %}selected{% endif %}>按发表人姓名</option>
+      </select>
+    </label>
+    <label>关键词
+      <input name="keyword" value="{{ keyword }}" placeholder="模糊匹配内容或姓名">
+    </label>
+    <button type="submit">查询</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>评论内容</th>
+        <th>姓名</th>
+        <th>评论时间</th>
+        <th>是否可见</th>
+        <th>文章标题</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in comments %}
+      <tr>
+        <td>{{ c.content }}</td>
+        <td>{{ c.user_name }}</td>
+        <td>{{ c.commented_at|date:"Y-m-d H:i" }}</td>
+        <td>{% if c.is_hidden == 0 %}显示(0){% else %}删除(1){% endif %}</td>
+        <td>{{ c.item_title_short }}</td>
+        <td class="ops">
+          <form method="post" action="{% url 'cms:comment_toggle' c.id %}">
+            {% csrf_token %}
+            <button type="submit">{% if c.is_hidden == 0 %}设为不显示{% else %}设为显示{% endif %}</button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6">暂无评论</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

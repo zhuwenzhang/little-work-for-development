@@ -9,7 +9,7 @@ from django.views.decorators.http import require_http_methods, require_POST
 from accounts.auth_utils import admin_required, get_current_user, login_required_custom
 from accounts.models import UserApp
 
-from .models import Category, Item
+from .models import Category, Comment, Item
 
 
 def _parse_day_range(date_from_str, date_to_str):
@@ -70,6 +70,18 @@ def home(request):
     )
 
     categories = Category.objects.all()
+    comments = []
+    comment_error = ""
+    comment_success = ""
+    if selected_item:
+        comments = list(
+            Comment.objects.filter(
+                item=selected_item, is_hidden=Comment.STATUS_SHOW
+            ).order_by("-commented_at")
+        )
+        comment_error = request.GET.get("cerr") or ""
+        comment_success = request.GET.get("cok") or ""
+
     return render(
         request,
         "cms/home.html",
@@ -77,6 +89,9 @@ def home(request):
             "items": items,
             "categories": categories,
             "selected_item": selected_item,
+            "comments": comments,
+            "comment_error": comment_error,
+            "comment_success": comment_success,
             "mode": mode,
             "keyword": keyword,
             "author": author,
@@ -86,6 +101,61 @@ def home(request):
             "searched": searched,
         },
     )
+
+
+@login_required_custom
+@require_POST
+def comment_create(request):
+    """前台发表评论。"""
+    user = request.cms_user
+    if user.is_admin_side:
+        return redirect("cms:admin_home")
+
+    item_id = (request.POST.get("item_id") or "").strip()
+    content = (request.POST.get("content") or "").strip()
+    category_id = (request.POST.get("category_id") or "").strip()
+    mode = (request.POST.get("mode") or "title").strip()
+    keyword = (request.POST.get("keyword") or "").strip()
+    author = (request.POST.get("author") or "").strip()
+    date_from = (request.POST.get("date_from") or "").strip()
+    date_to = (request.POST.get("date_to") or "").strip()
+
+    def _back(extra=None):
+        from urllib.parse import urlencode
+
+        q = {
+            "item": item_id,
+            "category_id": category_id,
+            "mode": mode,
+            "keyword": keyword,
+            "author": author,
+            "date_from": date_from,
+            "date_to": date_to,
+        }
+        if extra:
+            q.update(extra)
+        # 去掉空值，保持 URL 干净
+        q = {k: v for k, v in q.items() if v}
+        return redirect("/?" + urlencode(q))
+
+    if not item_id.isdigit():
+        return _back({"cerr": "文章不存在"})
+    item = Item.objects.filter(pk=int(item_id), is_published=True).first()
+    if not item:
+        return _back({"cerr": "文章不存在或未发布"})
+    if not content:
+        return _back({"cerr": "评论内容不能为空"})
+    if len(content) > 100:
+        return _back({"cerr": "评论内容不能超过100个字"})
+
+    Comment.objects.create(
+        user=user,
+        item=item,
+        content=content,
+        user_name=user.name,
+        is_hidden=Comment.STATUS_SHOW,
+    )
+    return _back({"cok": "1"})
 
 
 @login_required_custom
@@ -450,3 +520,39 @@ def user_reset_password(request, user_id):
     target.password = "123456"
     target.save(update_fields=["password", "updated_at"])
     return redirect("cms:user_list")
+
+
+# ---------- 评论管理 ----------
+@admin_required
+def comment_list(request):
+    mode = (request.GET.get("mode") or "content").strip()
+    keyword = (request.GET.get("keyword") or "").strip()
+
+    comments = Comment.objects.select_related("item", "user").all()
+    if mode == "content" and keyword:
+        comments = comments.filter(content__icontains=keyword)
+    elif mode == "name" and keyword:
+        comments = comments.filter(user_name__icontains=keyword)
+
+    return render(
+        request,
+        "cms/comment_list.html",
+        {
+            "comments": comments,
+            "mode": mode,
+            "keyword": keyword,
+        },
+    )
+
+
+@admin_required
+@require_POST
+def comment_toggle(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+    comment.is_hidden = (
+        Comment.STATUS_SHOW
+        if comment.is_hidden == Comment.STATUS_HIDDEN
+        else Comment.STATUS_HIDDEN
+    )
+    comment.save(update_fields=["is_hidden", "updated_at"])
+    return redirect("cms:comment_list")
