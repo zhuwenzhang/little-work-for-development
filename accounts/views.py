@@ -61,20 +61,13 @@ def login_view(request):
             return redirect("cms:admin_home")
         return redirect("cms:home")
 
-    context = {
-        "form": {"user_id": "", "password": "", "login_role": "1"},
-    }
+    context = {"form": {"user_id": "", "password": ""}}
     if request.method == "GET":
         return render(request, "accounts/login.html", context)
 
     user_id = (request.POST.get("user_id") or "").strip()
     password = (request.POST.get("password") or "").strip()
-    login_role = (request.POST.get("login_role") or "1").strip()
-    context["form"] = {
-        "user_id": user_id,
-        "password": password,
-        "login_role": login_role,
-    }
+    context["form"] = {"user_id": user_id, "password": password}
 
     if not user_id or not password:
         context["error"] = "请输入用户ID和密码"
@@ -95,16 +88,7 @@ def login_view(request):
         context["error"] = "该账号已停用，无法登录"
         return render(request, "accounts/login.html", context)
 
-    # 登录界面选择角色，需与库中用户类型匹配
-    if login_role == "1":
-        if user.user_type != UserApp.USER_TYPE_NORMAL:
-            context["error"] = "该账号不是普通用户，请选择管理员登录"
-            return render(request, "accounts/login.html", context)
-    else:
-        if user.user_type not in (UserApp.USER_TYPE_ADMIN, UserApp.USER_TYPE_SUPER):
-            context["error"] = "该账号不是管理员，请选择普通用户登录"
-            return render(request, "accounts/login.html", context)
-
+    # 按数据库中的用户类型跳转对应界面
     login_user(request, user)
     if user.is_admin_side:
         return redirect("cms:admin_home")

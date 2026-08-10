@@ -12,16 +12,10 @@
     <label>密码
       <input type="text" name="password" maxlength="30" value="{{ form.password }}" required>
     </label>
-    <label>登录身份
-      <select name="login_role">
-        <option value="1" {% if form.login_role == "1" %}selected{% endif %}>普通用户</option>
-        <option value="0" {% if form.login_role == "0" %}selected{% endif %}>管理员</option>
-      </select>
-    </label>
     <button type="submit">登录</button>
   </form>
   <p class="muted">还没有账号？<a href="{% url 'accounts:register' %}">去注册</a></p>
-  <p class="hint">演示账号：超级用户 <code>super</code> / <code>1</code>；管理员 <code>admin</code> / <code>1</code></p>
+  <p class="hint">演示账号：超级用户 <code>super</code> / <code>1</code>；管理员 <code>admin</code> / <code>1</code>；普通用户 <code>user01</code> / <code>1</code></p>
 </section>
 {% if error %}
 <script>alert("{{ error|escapejs }}");</script>
